@@ -33,7 +33,7 @@ namespace Apple
             this.progressBar1.Size = new System.Drawing.Size(784, 23);
             this.progressBar1.TabIndex = 3;
             this.progressBar1.Value = 0;
-            this.Controls.Add(progressBar1);
+          //  this.Controls.Add(progressBar1);
         }
 
         private void selectInFileBtn_Click(object sender, EventArgs e)
@@ -79,8 +79,8 @@ namespace Apple
             LogHelper.OutLog("导入数据成功!");
             for (int i = 0; i < AppleHelper.AccountDT.Rows.Count; i++)
             {
-                this.comboBox1.Items.Add(i+1);
-                this.comboBox2.Items.Add(i+1);
+                this.comboBox1.Items.Add(i + 1);
+                this.comboBox2.Items.Add(i + 1);
             }
 
             this.comboBox1.SelectedIndex = 0;
@@ -96,11 +96,7 @@ namespace Apple
             {
                 IsRunning = false;
                 this.startBtn.Text = "开始执行";
-                this.randCountryChk.Enabled = true;
-                this.randContextChk.Enabled = true;
-                this.comboBox1.Enabled = true;
-                this.comboBox2.Enabled = true;
-                this.comboBox3.Enabled = true;
+                SetState(true);
                 AppleHelper.IsRunning = false;
             }
             else
@@ -108,11 +104,7 @@ namespace Apple
                 IsRunning = true;
                 this.startBtn.Text = "停止";
                 //this.startBtn.Enabled = false;
-                this.randCountryChk.Enabled = false;
-                this.randContextChk.Enabled = false;
-                this.comboBox1.Enabled = false;
-                this.comboBox2.Enabled = false;
-                this.comboBox3.Enabled = false;
+                SetState(false);
                 th = new Thread(execute);
                 th.Start();
             }
@@ -394,7 +386,7 @@ namespace Apple
                 }
 
             }
-            if(IsRunning == false)
+            if (IsRunning == false)
             {
                 LogHelper.OutLog(Color.Orange, "强制终止执行。。");
             }
@@ -461,11 +453,13 @@ namespace Apple
                 this.startBtn.Invoke(new MethodInvoker(() =>
                 {
                     this.startBtn.Text = "开始执行";
+                    SetState(true);
                 }));
             }
             else
             {
                 this.startBtn.Text = "开始执行";
+                SetState(true);
             }
         }
         private void SetDataGridViewStatus(int index, string text, Color backColor)
@@ -486,17 +480,23 @@ namespace Apple
         }
         private void Recod(int index, string retStr, bool isOk = true)
         {
-            if (isOk)
+            try
             {
-                sr.WriteLine("{0}|{1}|{2}", index, "OK", retStr);
-                SetDataGridViewStatus(index, "成功:" + retStr, Color.Green);
-                AppleHelper.Record.Add(index + "", "成功:" + retStr);
+                if (isOk)
+                {
+                    sr.WriteLine("{0}|{1}|{2}", index, "OK", retStr);
+                    SetDataGridViewStatus(index, "成功:" + retStr, Color.Green);
+                    AppleHelper.Record.Add(index + "", "成功:" + retStr);
+                }
+                else
+                {
+                    sr.WriteLine("{0}|{1}|{2}", index, "Faild", retStr);
+                    SetDataGridViewStatus(index, "失败:" + retStr, Color.Red);
+                    AppleHelper.Record.Add(index + "", "失败:" + retStr);
+                }
             }
-            else
+            catch (Exception)
             {
-                sr.WriteLine("{0}|{1}|{2}", index, "Faild", retStr);
-                SetDataGridViewStatus(index, "失败:" + retStr, Color.Red);
-                AppleHelper.Record.Add(index + "", "失败:" + retStr);
             }
         }
 
@@ -705,12 +705,12 @@ namespace Apple
 
             try
             {
-                if (th!=null)
+                if (th != null)
                 {
                     th.Abort();
                 }
             }
-            catch (Exception )
+            catch (Exception)
             {
             }
         }
@@ -742,6 +742,21 @@ namespace Apple
             rectangle,
             dataGridView1.RowHeadersDefaultCellStyle.ForeColor,
             TextFormatFlags.VerticalCenter | TextFormatFlags.HorizontalCenter);
+        }
+
+        private void startBtn_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void SetState(bool state)
+        {
+            this.randContextChk.Enabled = state;
+            this.randCountryChk.Enabled = state;
+            this.comboBox1.Enabled = state;
+            this.comboBox2.Enabled = state;
+            this.comboBox3.Enabled = state;
+
         }
     }
 }
